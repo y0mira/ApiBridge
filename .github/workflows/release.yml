@@ -26,7 +26,7 @@ jobs:
         shell: pwsh
         run: npm run build:launcher
       - run: |
-          mkdir release
+          mkdir -p release
           npm pack --workspace @api-bridge/core --pack-destination release
           npm pack --workspace @api-bridge/cli --pack-destination release
           cp web.config.json release/web.config.json
