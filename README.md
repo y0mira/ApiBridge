@@ -2,13 +2,42 @@
 
 [English](./README.en.md)
 
-API Bridge 是本地优先的 OpenAPI 前端契约工具：Web 工作台用于浏览、Mock、Fixture、Diff 和响应校验；CLI 将同一套确定性生成器和规则接入真实仓库与 CI。所有规范、Fixture、响应和设置均留在用户设备，不上传、不遥测，也不抓取远程 URL。
+API Bridge 是一个本地优先的 OpenAPI 前端契约工作台，帮助前端开发者把 Swagger/OpenAPI 文档转换为可浏览、可验证、可生成代码的工程资产。
 
-文档：[项目介绍](./docs/project-introduction.md) · [操作手册](./docs/user-manual.md) · [架构](./docs/architecture.md) · [生成兼容矩阵](./docs/generator-compatibility.md)
+它由 Web 工作台、共享核心库、CLI 和 Windows 单文件启动器组成。Web 与 CLI 复用同一套解析、代码生成、Mock、Fixture、Diff 和响应校验逻辑。导入的规范、Fixture、真实响应、Mock 场景和配置均保存在用户设备中，不上传、不遥测，也不抓取远程 URL。
 
-> 在线体验：尚未部署。仓库启用 GitHub Pages 后，由 Pages 工作流提供实际地址。
->
-> 截图：发布前可在此放置经过脱敏的真实产品截图；当前仓库没有虚构截图。
+## 能做什么
+
+- 浏览 OpenAPI 3.0/3.1 接口、参数、请求体、响应和 Schema。
+- 生成 TypeScript、Zod、MSW、Fetch、Axios 和 TanStack Query 代码。
+- 创建成功、空数据、错误、延迟、网络失败和响应序列等 Mock 场景。
+- 生成确定性 Fixture，并导出 factory 或数据列表。
+- 比较两个 OpenAPI 版本，识别 breaking、warning 和 info 变化。
+- 根据指定 operation 和状态码校验真实 JSON 响应。
+- 在 CLI 和 CI 中检查规范、破坏性变更及生成代码是否过期。
+
+API Bridge 不是 Postman：它不负责发送业务请求、管理认证或代理 CORS。你可以从 Swagger UI 获取 OpenAPI JSON 和接口响应，再交给 API Bridge 在本地处理。
+
+## 产品组成
+
+```text
+API Bridge
+├── Web 工作台（React + Vite）
+├── @api-bridge/core（Web 与 CLI 共享核心）
+├── @api-bridge/cli（Node.js CLI）
+└── API-Bridge.exe（内嵌 Web 的 Windows 启动器）
+```
+
+## 立即使用
+
+Windows 用户可以从 [最新 Release](https://github.com/y0mira/ApiBridge/releases/latest) 下载：
+
+- `API-Bridge.exe`：双击启动，无需安装 Node.js、npm 或 Go。
+- `web.config.json`：与 exe 放在同一目录，用于修改端口和是否自动打开浏览器。
+
+首次运行时，Windows 可能显示来源提示。确认文件来自本仓库 Release 后运行即可。默认访问地址为 `http://127.0.0.1:59116`。
+
+文档：[操作手册](./docs/user-manual.md) · [完整项目介绍](./docs/project-introduction.md) · [架构](./docs/architecture.md) · [生成兼容矩阵](./docs/generator-compatibility.md)
 
 ## 要求与 Web 快速开始
 
