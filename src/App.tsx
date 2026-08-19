@@ -18,13 +18,20 @@ import {
   X,
 } from 'lucide-react'
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { db } from './core/db'
-import { generateAll } from './core/generator'
-import { parseOpenApi } from './core/parser'
-import type { GeneratedFile, Operation, Project, Schema } from './core/types'
+import {
+  generateAll,
+  parseOpenApi,
+  type GeneratedFile,
+  type Operation,
+  type Project,
+  type Schema,
+} from './core'
 import { SAMPLE_SPEC } from './sample'
 import { SchemaTree } from './components/SchemaTree'
 import { WorkflowWorkbench } from './components/WorkflowWorkbench'
+import { observeTranslations, type Locale } from './i18n'
 
 const Editor = lazy(() => import('./components/LazyEditor'))
 
@@ -32,6 +39,7 @@ type Panel = 'projects' | 'endpoints' | 'inspector'
 const uid = () => globalThis.crypto?.randomUUID?.() ?? `project-${Date.now()}`
 
 export default function App() {
+  const { i18n } = useTranslation()
   const [projects, setProjects] = useState<Project[]>([])
   const [project, setProject] = useState<Project>()
   const [source, setSource] = useState('')
@@ -51,6 +59,8 @@ export default function App() {
   )
   const [visibleLimit, setVisibleLimit] = useState(200)
   const fileInput = useRef<HTMLInputElement>(null)
+
+  useEffect(() => observeTranslations(), [])
 
   useEffect(() => {
     db.projects
@@ -230,6 +240,18 @@ export default function App() {
           <div className="privacy">
             <ShieldCheck size={15} /> 规范只保存在此浏览器
           </div>
+          <div className="language-switch" role="group" aria-label="语言">
+            {(['zh-CN', 'en-US'] as Locale[]).map((locale) => (
+              <button
+                key={locale}
+                className="language-button"
+                aria-pressed={i18n.resolvedLanguage === locale}
+                onClick={() => void i18n.changeLanguage(locale)}
+              >
+                {locale === 'zh-CN' ? '中文' : 'English'}
+              </button>
+            ))}
+          </div>
           <button
             className="icon-button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -239,6 +261,9 @@ export default function App() {
           </button>
         </div>
       </header>
+      <div className="sr-only" role="status" aria-live="polite">
+        {copied ? '代码已复制' : ''}
+      </div>
       <nav className="mobile-nav" aria-label="工作区导航">
         {(
           [

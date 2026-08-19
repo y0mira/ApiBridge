@@ -1,73 +1,161 @@
 # API Bridge
 
-API Bridge 是一个本地优先的 OpenAPI 前端契约工作台。它在浏览器内导入和校验 OpenAPI 3.0/3.1，浏览 endpoint 与 schema，生成前端代码，并为后端未完成、响应不稳定和契约变化提供可复现的 Mock、Fixture、Diff 与真实响应校验。
+[English](./README.en.md)
 
-## 隐私模型
+API Bridge 是本地优先的 OpenAPI 前端契约工具：Web 工作台用于浏览、Mock、Fixture、Diff 和响应校验；CLI 将同一套确定性生成器和规则接入真实仓库与 CI。所有规范、Fixture、响应和设置均留在用户设备，不上传、不遥测，也不抓取远程 URL。
 
-规范文本、解析结果和最近选择只存入当前浏览器的 IndexedDB。应用没有后端、遥测、远程 URL 抓取或上传行为。删除项目和清空数据都需要确认。静态构建可直接部署到 GitHub Pages。
+文档：[项目介绍](./docs/project-introduction.md) · [操作手册](./docs/user-manual.md) · [架构](./docs/architecture.md) · [生成兼容矩阵](./docs/generator-compatibility.md)
 
-## 开始使用
+> 在线体验：尚未部署。仓库启用 GitHub Pages 后，由 Pages 工作流提供实际地址。
+>
+> 截图：发布前可在此放置经过脱敏的真实产品截图；当前仓库没有虚构截图。
 
-要求 Node.js 20.17 或更高版本。
+## 要求与 Web 快速开始
+
+Node.js 20.17 或更高版本（不支持 Node 18）。
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-打开页面后导入规范、选择 endpoint，再从右侧“打开工具”进入 Scenarios、Fixtures、Diff 和 Validate。工具页 URL 保存 project、operation 和当前工具，支持浏览器前进后退。
+启动后访问 `http://127.0.0.1:5173`。开发服务器端口可在仓库根目录的 [`web.config.json`](./web.config.json) 中修改：
 
-## 第二阶段工作流
+```json
+{
+  "host": "127.0.0.1",
+  "port": 5173,
+  "previewPort": 4173,
+  "openBrowser": true
+}
+```
 
-- **Mock 场景**：每个 operation 有成功、空数据和常见错误预设；可自定义状态、headers、JSON/text body、0–30 秒延迟、网络失败及响应序列。场景具有稳定 ID且唯一默认，支持复制、排序、删除和未保存离开提示。
-- **Fixture**：使用固定 seed 和稳定 ID生成单个或列表数据，支持 overrides 和明确标记的边界/违约变体；可导出 JSON、TypeScript 常量和 `build`/`buildList` factory。
-- **OpenAPI Diff**：当前项目作为 baseline，candidate 在 Web Worker 中解析比较；可导出顺序稳定的 Markdown/JSON 报告。
-- **真实响应校验**：只处理粘贴的数据，不请求任意后端；报告 JSON Pointer、期望/实际值和建议，有效响应可保存为场景，导出前可递归脱敏。
-- **主题与性能**：完整浅色/深色主题、reduced-motion、按需 Monaco、每批 200 个 endpoint 的分段渲染。
+修改后重新启动服务。若要让局域网其他设备访问，可把 `host` 改为 `'0.0.0.0'`，并使用本机局域网 IP 打开页面。
 
-MSW 场景文件可独立放入业务项目，通过 `_scenario` query、`x-api-scenario` header、`API_SCENARIO` 环境变量或 `setApiScenario()` 选择场景，不依赖 API Bridge 页面运行。
+浏览器中导入本地 OpenAPI JSON/YAML，选择 endpoint 后可生成代码或进入 Scenarios、Fixtures、Diff、Validate。顶栏可在“中文 / English”之间无刷新切换；选择保存在 localStorage，项目和场景保存在 IndexedDB。
 
-## 验证命令
+`npm run build:web` 生成纯静态 `dist/`。GitHub Pages 使用 [pages.yml](./.github/workflows/pages.yml) 注入仓库子路径；其他静态平台可直接部署。支持 `_headers` 的平台会应用 CSP 示例；GitHub Pages 不支持自定义响应头，因此 `index.html` 另含 CSP meta。
+
+本地验证生产构建：
+
+```bash
+npm run build:web
+npm run preview:web
+```
+
+## Windows 单文件启动器
+
+安装 Go 1.22+ 后运行：
+
+```powershell
+npm ci
+npm run build:launcher
+```
+
+产物为 `release/API-Bridge.exe` 和 `release/web.config.json`。exe 已内嵌 Web production build，不要求目标电脑安装 Node.js、npm 或 Go。将这两个文件放在同一目录，双击 exe 会在配置的 `host`/`port` 启动本地服务并在 `openBrowser` 为 `true` 时打开默认浏览器；关闭控制台窗口即停止服务。
+
+exe 旁没有 `web.config.json` 时使用 `127.0.0.1:59116` 并自动打开浏览器。端口被占用或配置无效时不会自动换端口，而是在控制台给出明确错误，避免书签和集成地址悄悄变化。启动器只提供内嵌静态站点，不复制 parser、生成器或工作流逻辑。
+
+## CLI 快速开始
+
+发布后安装包：
+
+```bash
+npm install --save-dev @api-bridge/cli
+npx api-bridge check ./openapi.yaml
+npx api-bridge generate ./openapi.yaml --output ./src/api
+npx api-bridge diff ./baseline.yaml ./candidate.yaml --format markdown
+npx api-bridge validate-response ./openapi.yaml --operation getUsers --status 200 --input response.json
+```
+
+生成目标可用 `--targets typescript,zod,msw,fetch,axios,query` 选择。`--dry-run` 只报告；`--check` 检测生成目录是否过期且绝不写文件；`--json` 提供稳定机器输出。退出码：`0` 成功，`1` 用法/I/O/解析失败，`2` 契约校验失败、breaking Diff 或生成结果过期。
+
+配置文件 `api-bridge.config.ts`：
+
+```ts
+export default {
+  schemaVersion: '1.0.0',
+  input: './openapi.yaml',
+  output: './src/api',
+  targets: ['typescript', 'zod', 'fetch', 'query'],
+}
+```
+
+优先级为 CLI 参数 > 配置文件 > 默认值。CLI 只处理本地 JSON/YAML。写入前先在内存生成全部文件，再通过 staging/rename 提交；只替换 manifest 中的管理文件，不删除用户文件。manifest 记录 schema/tool/core 版本、规范 basename 与 SHA-256、配置摘要和管理文件，不记录绝对路径、密钥或时间。
+
+## 生成结果与兼容性
+
+| 目标           | 文件                   | 兼容范围                 |
+| -------------- | ---------------------- | ------------------------ |
+| TypeScript     | `api-types.ts`         | TypeScript 5.x           |
+| Zod            | `api-schemas.ts`       | Zod 3.24+                |
+| MSW            | `api-handlers.ts`      | MSW 2.x                  |
+| Fetch          | `api-fetch.ts`         | 标准 fetch / AbortSignal |
+| Axios          | `api-axios.ts`         | 注入 Axios 1.x instance  |
+| TanStack Query | `api-query-options.ts` | v5 option factories      |
+
+生成文件顺序和 LF 换行稳定，顶部包含来源 basename 与“不要手改”，没有时间戳或绝对路径。fetch/Axios 支持 base URL、参数序列化、headers 注入、AbortSignal 和类型化错误；不生成业务认证逻辑。详见 [生成兼容矩阵](./docs/generator-compatibility.md)。
+
+## Web 能力
+
+- OpenAPI 3.0/3.1、JSON/YAML、最大 10 MiB；本地 `$ref`、参数、request/response schema。
+- 确定性 TypeScript、Zod、MSW、fetch、Axios、Query 生成。
+- 成功、空数据、常见错误、延迟、网络失败、响应序列等 Mock 场景。
+- 固定 seed、overrides、边界/故意违约 Fixture 和 factory/buildList 导出。
+- 稳定 breaking/warning/info OpenAPI Diff Markdown/JSON 报告。
+- 本地真实响应校验、JSON Pointer 问题、场景保存和敏感字段脱敏。
+- 浅/深主题、中文/英文、深链接、键盘焦点、reduced-motion 和响应式布局。
+
+## CI 与发布验证
 
 ```bash
 npm run lint
+npm run format:check
 npm run typecheck
 npm run test
 npm run build
 npx playwright install chromium
 npm run test:e2e
+npm run pack:smoke
+npm run benchmark
 ```
 
-## 支持范围
+项目 CI 在 Ubuntu 执行完整检查并交叉编译 Windows 启动器，在 Windows、Ubuntu、macOS 上执行 CLI 测试和 tarball 冒烟。可复制的契约检查示例见 [api-contract.github-actions.yml](./docs/examples/api-contract.github-actions.yml)。发布工作流构建 Web zip、Windows exe、配置文件、core/CLI tarball 和 SHA-256；不会执行 `npm publish`。
 
-- OpenAPI 3.0 和 3.1；JSON/YAML；最大 10 MiB。
-- 本地 JSON Pointer `$ref`，并检测不可解析引用；外部引用显示 warning，不发起网络请求。
-- 参数位置：path、query、header、cookie；JSON request/response schema。
-- Schema：object、array、required/optional、nullable、enum、dictionary、oneOf、anyOf、allOf 和递归组件引用。
-- Zod：object、array、enum、literal、union、intersection、递归 `z.lazy`，以及常用 number/string constraints。
-- MSW 2.x：每个 operation 一个成功 handler；按 examples、example、确定性 schema 示例的顺序生成响应。
-- 客户端：原生 fetch、注入 Axios instance、TanStack Query v5 option factories；包含参数序列化、base URL/headers 注入、AbortSignal 和最小类型化错误。
-- 输出排序稳定，相同输入和选择产生字节级一致结果。
+本地制作包但不发布：
 
-无法精确映射的结构会生成 `unknown` 或 `z.unknown()` 并显示 warning，不会静默使用 `any`。生成文件假设业务项目已安装 `zod` 或 `msw`。
+```bash
+npm run build
+npm pack --workspace @api-bridge/core
+npm pack --workspace @api-bridge/cli
+# 经人工核对包名、registry、权限和 tarball 后才可执行：
+npm publish ./api-bridge-core-0.1.0.tgz --access public
+npm publish ./api-bridge-cli-0.1.0.tgz --access public
+```
 
-## 架构
+## 架构、版本与安全
 
-- `src/core/parser.ts`：格式解析、OpenAPI 基础校验、引用检查和 operation 规范化。
-- `src/core/generator.ts`、`client-generator.ts`：TypeScript、Zod、MSW、fetch、Axios 和 Query options 的确定性生成。
-- `src/core/scenarios.ts`、`fixtures.ts`、`validator.ts`：场景、Fixture 和真实响应校验。
-- `src/core/diff.ts`、`src/workers/diff.worker.ts`：确定性契约 Diff 与后台执行。
-- `src/core/db.ts`：v3 IndexedDB 项目、场景和版本存储；升级只增加索引，不删除旧数据。
-- `src/App.tsx`、`src/components/WorkflowWorkbench.tsx`：契约浏览和第二阶段工具。
-- `src/components/SchemaTree.tsx`：可展开 schema tree 与路径复制。
-- `src/**/*.test.ts(x)`、`e2e/`：单元、组件、持久化和浏览器主流程测试。
+- `src/core/index.ts`：Web 与 CLI 共用的无 DOM/React/文件系统 public API。
+- `packages/core`：`@api-bridge/core` 发布包装。
+- `packages/cli`：Node 20+ 文件、配置、manifest、原子提交和退出码适配层。
+- `src`：React/Vite Web 和 IndexedDB/Worker 浏览器适配。
 
-## 已知限制
+Core API、manifest、JSON Diff report schema 当前均为 `1.0.0`，未知 major 必须拒绝。`0.x` 的 breaking public API/生成字节变化会提升 minor 并写入 CHANGELOG；弃用项尽量保留至少一个 minor。架构详情见 [architecture.md](./docs/architecture.md)，Diff 规则见 [diff-rules.md](./docs/diff-rules.md)。
 
-- 不解析外部或远程 `$ref`；不执行完整 OpenAPI Schema 方言验证。
-- 不在浏览器中请求任意后端；真实响应必须粘贴或导入。
-- TanStack Query 生成的是 v5 option factories，而不是 hooks，便于业务项目按自己的组件边界组合。
-- 不生成业务认证逻辑；fetch headers 和 Axios instance 是明确注入点。
-- 暂不实现 CLI、复杂 Faker 数据工厂或 Postman 式通用请求客户端。
-- Zod 只映射明确支持的约束；其余约束会产生 warning。
-- 项目数据跟随浏览器站点存储，清除站点数据后无法恢复。
+导入内容只经 JSON/YAML 解析并作为转义文本显示，不执行脚本或 Markdown。Web 无后端、认证代理、遥测和第三方脚本；CLI 不联网。安全问题请勿携带真实规范或响应公开提交，参见 [SECURITY.md](./SECURITY.md)。
+
+## 支持矩阵与限制
+
+| 范围   | 状态                                                                   |
+| ------ | ---------------------------------------------------------------------- |
+| Web    | Chromium 自动化；Firefox/WebKit 尚未验证                               |
+| CLI    | Windows 本地验证；Linux/macOS 由 CI 矩阵定义，当前仓库运行前不声称通过 |
+| Node   | 20+；仓库开发要求 20.17+                                               |
+| `$ref` | 仅本地 JSON Pointer；不获取外部/远程引用                               |
+| Schema | 常用 object/array/required/nullable/enum/组合/递归；不是完整方言验证器 |
+
+本项目不提供 Postman 式请求客户端、CORS/认证代理、账号/团队/云同步、AI 自动修复、VS Code 插件或远程规范抓取。真实响应必须粘贴或导入。项目数据随浏览器站点存储，清除站点数据后无法恢复。
+
+## 开源协作与路线图
+
+项目采用 [MIT License](./LICENSE)。贡献前阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)、[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) 和 [CHANGELOG.md](./CHANGELOG.md)。后续版本可在真实需求驱动下扩展更多 OpenAPI 方言映射、浏览器矩阵和构建拆包；不承诺未实现的云端或通用 HTTP 能力。

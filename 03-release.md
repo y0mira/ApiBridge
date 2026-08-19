@@ -90,6 +90,7 @@ Web 管理界面和核心文档支持 `zh-CN`、`en-US`：
 ## 6. Web 发布与安全
 
 - 生产 Web 是纯静态站点，可部署到 GitHub Pages，并提供其他静态托管说明。
+- 开发服务器和本地 production preview 的 host/port 必须可在仓库配置文件中修改，不要求用户改 npm script。
 - 正确处理非根路径 base URL 和 SPA 路由刷新。
 - 提供 GitHub Pages 部署工作流，但不伪造真实域名。
 - 添加 CSP 等适合静态应用的安全头部署示例。
@@ -136,6 +137,9 @@ Web 管理界面和核心文档支持 `zh-CN`、`en-US`：
 ## 10. 发布产物
 
 - Web production artifact。
+- Windows 单文件启动器：内嵌同一份 Web production artifact，双击后启动 loopback HTTP 服务并按配置自动打开默认浏览器；不得复制 Web/core 业务实现。
+- 启动器端口、监听地址和是否自动打开浏览器由 exe 同目录的可读配置文件控制；目标电脑不应要求安装 Node.js、npm 或 Go。
+- 使用轻量 Go 启动器，不为静态 Web 引入 Electron；构建过程必须可复现，并在 Release 中提供 exe、默认配置和校验值。
 - npm `core` 包（仅当对外复用确有稳定 public API）。
 - npm CLI 包。
 - GitHub Release 中附带 source、Web artifact、校验值和 release notes。
@@ -159,6 +163,7 @@ Web 管理界面和核心文档支持 `zh-CN`、`en-US`：
 12. 导入恶意文本只显示为数据，不执行脚本。
 13. Git 状态中无构建物、缓存、用户规范、Fixture 下载、密钥和本机配置。
 14. README、支持矩阵、生成代码和实际行为一致。
+15. 修改配置文件后开发服务器使用指定端口；Windows 启动器双击后使用指定端口并自动打开浏览器。
 
 无法在当前环境验证的平台或发布步骤必须明确标为“未验证”，给出准确复现命令，禁止用推测代替结果。
 

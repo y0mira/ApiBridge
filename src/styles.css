@@ -832,6 +832,28 @@ textarea:focus-visible {
   align-items: center;
   gap: 8px;
 }
+
+.language-switch {
+  display: inline-flex;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.language-button {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.language-button[aria-pressed='true'] {
+  color: var(--text);
+  background: var(--surface2);
+}
 :root[data-theme='light'] .topbar {
   background: #fff;
 }
@@ -1258,4 +1280,358 @@ textarea:focus-visible {
   border-radius: 0;
   flex: 0 0 auto;
   padding: 6px 10px;
+}
+
+/* Refined contract-workbench surface: depth comes from hierarchy, not decoration. */
+:root[data-theme='light'] {
+  --bg: #e9eff6;
+  --panel: #f8fafc;
+  --surface: #f1f5f9;
+  --surface2: #e5ecf4;
+  --border: #cbd6e3;
+  --muted: #5b6b80;
+  --text: #142033;
+  --accent: #087f4e;
+  --accent-dark: #dff5e9;
+  --input: #fff;
+}
+
+:root[data-theme='light'] .app-shell {
+  background:
+    linear-gradient(rgba(15, 39, 66, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 39, 66, 0.025) 1px, transparent 1px), var(--bg);
+  background-size: 24px 24px;
+}
+
+:root[data-theme='light'] .topbar {
+  position: relative;
+  z-index: 10;
+  border-bottom-color: #d7e0ea;
+  box-shadow: 0 1px 8px rgba(30, 51, 76, 0.07);
+}
+
+:root[data-theme='light'] .brand strong {
+  color: #102039;
+  letter-spacing: -0.025em;
+}
+
+:root[data-theme='light'] .privacy {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #f2f6fa;
+}
+
+:root[data-theme='light'] .language-switch {
+  padding: 3px;
+  border-color: #d5deea;
+  background: #f4f7fb;
+  border-radius: 9px;
+}
+
+:root[data-theme='light'] .language-button {
+  min-height: 36px;
+  border-radius: 6px;
+  transition:
+    color 150ms var(--ease),
+    background 150ms var(--ease),
+    box-shadow 150ms var(--ease);
+}
+
+:root[data-theme='light'] .language-button[aria-pressed='true'] {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(30, 51, 76, 0.12);
+}
+
+:root[data-theme='light'] .workspace {
+  gap: 1px;
+  background: #cbd6e3;
+}
+
+:root[data-theme='light'] .panel {
+  border-right: 0;
+  background: rgba(248, 250, 252, 0.96);
+}
+
+:root[data-theme='light'] .panel:nth-child(2) {
+  background: rgba(251, 252, 254, 0.97);
+}
+
+:root[data-theme='light'] .panel:last-child {
+  background: rgba(245, 248, 251, 0.98);
+  box-shadow: -8px 0 24px rgba(30, 51, 76, 0.05);
+}
+
+:root[data-theme='light'] .panel-heading {
+  border-bottom-color: #d8e1eb;
+  background: rgba(255, 255, 255, 0.64);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-theme='light'] .eyebrow {
+  color: #73849a;
+}
+
+:root[data-theme='light'] .import-card {
+  margin: 12px;
+  padding: 14px;
+  border: 1px solid #d5deea;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(30, 51, 76, 0.045);
+}
+
+:root[data-theme='light'] .source-editor,
+:root[data-theme='light'] .tool-editor {
+  border-color: #aebccd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme='light'] .button {
+  border-radius: 8px;
+  transition:
+    background 150ms var(--ease),
+    border-color 150ms var(--ease),
+    box-shadow 150ms var(--ease),
+    transform 120ms var(--ease),
+    opacity 150ms;
+}
+
+:root[data-theme='light'] .button:not(:disabled):active,
+:root[data-theme='light'] .icon-button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+:root[data-theme='light'] .button.primary {
+  color: #fff;
+  background: #087f4e;
+  border-color: #087f4e;
+  box-shadow: 0 4px 12px rgba(8, 127, 78, 0.18);
+}
+
+:root[data-theme='light'] .button.primary:hover:not(:disabled) {
+  background: #066c43;
+  border-color: #066c43;
+  box-shadow: 0 6px 16px rgba(8, 127, 78, 0.24);
+}
+
+:root[data-theme='light'] .button.secondary {
+  background: #f8fafc;
+}
+
+:root[data-theme='light'] .button.secondary:hover:not(:disabled) {
+  background: #eef3f8;
+  border-color: #aebccd;
+}
+
+:root[data-theme='light'] .history-label {
+  padding: 0 4px;
+}
+
+:root[data-theme='light'] .project-item {
+  margin: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+:root[data-theme='light'] .project-item.active {
+  border-color: #c8ded2;
+  background: #edf8f2;
+  box-shadow: 0 2px 8px rgba(8, 127, 78, 0.06);
+}
+
+:root[data-theme='light'] .search {
+  margin: 12px;
+  border-color: #d0dae6;
+  border-radius: 9px;
+  box-shadow: 0 2px 10px rgba(30, 51, 76, 0.04);
+}
+
+:root[data-theme='light'] .endpoint {
+  margin: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+:root[data-theme='light'] .endpoint:hover {
+  border-color: #d5deea;
+  background: #f4f7fb;
+}
+
+:root[data-theme='light'] .endpoint.inspected {
+  position: relative;
+  border-color: #cad7e5;
+  background: #edf3fa;
+  box-shadow: 0 2px 8px rgba(30, 51, 76, 0.045);
+}
+
+:root[data-theme='light'] .endpoint.inspected::before {
+  position: absolute;
+  inset: 8px auto 8px -1px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+  content: '';
+}
+
+:root[data-theme='light'] .workflow-tabs {
+  flex-basis: 54px;
+  gap: 4px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+:root[data-theme='light'] .workflow-tabs button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 7px;
+  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  transition:
+    color 150ms var(--ease),
+    background 150ms var(--ease);
+}
+
+:root[data-theme='light'] .workflow-tabs button:hover:not(.active) {
+  color: var(--text);
+  background: #f0f4f8;
+}
+
+:root[data-theme='light'] .workflow-tabs button.active {
+  color: #076b43;
+  background: var(--accent-dark);
+  box-shadow: inset 0 0 0 1px #c3e7d2;
+}
+
+:root[data-theme='light'] .tool-pane {
+  padding: 18px 20px 24px;
+}
+
+:root[data-theme='light'] .tool-head {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d9e2ec;
+}
+
+:root[data-theme='light'] .tool-head h3 {
+  color: #132238;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+}
+
+:root[data-theme='light'] .scenario-layout {
+  grid-template-columns: minmax(170px, 200px) minmax(0, 1fr);
+  gap: 18px;
+}
+
+:root[data-theme='light'] .scenario-list {
+  gap: 5px;
+}
+
+:root[data-theme='light'] .scenario-list > button {
+  min-height: 48px;
+  padding: 10px 9px 10px 11px;
+  border-radius: 8px;
+  transition:
+    background 150ms var(--ease),
+    border-color 150ms var(--ease),
+    box-shadow 150ms var(--ease),
+    transform 120ms var(--ease);
+}
+
+:root[data-theme='light'] .scenario-list > button:hover {
+  border-color: #d5deea;
+  background: #f8fafc;
+}
+
+:root[data-theme='light'] .scenario-list > button:active {
+  transform: translateY(1px);
+}
+
+:root[data-theme='light'] .scenario-list > button.active {
+  border-color: #bfd7ca;
+  background: #eaf6f0;
+  box-shadow: 0 3px 10px rgba(8, 127, 78, 0.08);
+}
+
+:root[data-theme='light'] .scenario-list > button.active::before {
+  position: absolute;
+  inset: 9px auto 9px 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+  content: '';
+}
+
+:root[data-theme='light'] .scenario-list .add-scenario {
+  justify-content: center;
+  border-color: #b8c6d6;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+:root[data-theme='light'] .scenario-form {
+  padding: 16px;
+  border: 1px solid #d4deea;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(30, 51, 76, 0.07);
+}
+
+:root[data-theme='light'] .scenario-form label,
+:root[data-theme='light'] .tool-pane > label {
+  color: #52647a;
+  font-size: 11px;
+}
+
+:root[data-theme='light'] .scenario-form input,
+:root[data-theme='light'] .scenario-form select,
+:root[data-theme='light'] .scenario-form textarea,
+:root[data-theme='light'] .tool-pane input,
+:root[data-theme='light'] .tool-pane select,
+:root[data-theme='light'] .tool-pane > label > textarea {
+  border-color: #c9d5e2;
+  border-radius: 8px;
+  background: #fbfcfe;
+  transition:
+    border-color 150ms var(--ease),
+    box-shadow 150ms var(--ease),
+    background 150ms var(--ease);
+}
+
+:root[data-theme='light'] .scenario-form input:hover,
+:root[data-theme='light'] .scenario-form select:hover,
+:root[data-theme='light'] .scenario-form textarea:hover {
+  border-color: #aebdcc;
+}
+
+:root[data-theme='light'] .scenario-form input:focus,
+:root[data-theme='light'] .scenario-form select:focus,
+:root[data-theme='light'] .scenario-form textarea:focus {
+  border-color: #4b91bb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+@media (max-width: 900px) {
+  :root[data-theme='light'] .import-card,
+  :root[data-theme='light'] .search,
+  :root[data-theme='light'] .project-item,
+  :root[data-theme='light'] .endpoint {
+    margin-right: 6px;
+    margin-left: 6px;
+  }
+
+  :root[data-theme='light'] .tool-pane {
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme='light'] .button,
+  :root[data-theme='light'] .icon-button,
+  :root[data-theme='light'] .scenario-list > button {
+    transform: none !important;
+  }
 }

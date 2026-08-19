@@ -11,30 +11,33 @@ import {
   Save,
   ShieldCheck,
 } from 'lucide-react'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { db } from '../core/db'
-import { diffOpenApi, diffToJson, diffToMarkdown } from '../core/diff'
-import { fixtureExports, generateFixture, generateIntentionalVariant } from '../core/fixtures'
-import { parseOpenApi } from '../core/parser'
 import {
   createPresetScenarios,
+  diffOpenApi,
+  diffToJson,
+  diffToMarkdown,
   duplicateScenario,
+  fixtureExports,
+  generateFixture,
+  generateIntentionalVariant,
   generateScenarioMsw,
   moveScenario,
   normalizeScenarios,
+  parseOpenApi,
+  redactSensitive,
   sequenceStep,
+  validateValue,
   validateScenarioJson,
-} from '../core/scenarios'
-import type {
-  BoundaryVariant,
-  DiffItem,
-  MockScenario,
-  Operation,
-  Project,
-  Schema,
-  ValidationIssue,
-} from '../core/types'
-import { redactSensitive, validateValue } from '../core/validator'
+  type BoundaryVariant,
+  type DiffItem,
+  type MockScenario,
+  type Operation,
+  type Project,
+  type Schema,
+  type ValidationIssue,
+} from '../core'
 
 const Editor = lazy(() => import('./LazyEditor'))
 type Tool = 'scenarios' | 'fixtures' | 'diff' | 'validate'
@@ -82,6 +85,8 @@ export function WorkflowWorkbench({ project, operation, onGenerated }: Props) {
   const [responseText, setResponseText] = useState('{}')
   const [responseHeaders, setResponseHeaders] = useState('Content-Type: application/json')
   const [validation, setValidation] = useState<ValidationIssue[] | null>(null)
+  const diffWorker = useRef<Worker | null>(null)
+  const diffRun = useRef(0)
   const active = scenarios.find((item) => item.id === activeScenario)
   const response =
     operation.responses.find((item) => item.status === responseStatus) ?? operation.responses[0]
@@ -99,6 +104,13 @@ export function WorkflowWorkbench({ project, operation, onGenerated }: Props) {
         setActiveScenario(next[0]?.id ?? '')
       })
   }, [operation, project.id])
+  useEffect(
+    () => () => {
+      diffRun.current += 1
+      diffWorker.current?.terminate()
+    },
+    [project.id],
+  )
   useEffect(() => {
     const listener = () => {
       const next = new URLSearchParams(location.search).get('tool') as Tool
@@ -167,6 +179,8 @@ export function WorkflowWorkbench({ project, operation, onGenerated }: Props) {
     }
   }
   const runDiff = async () => {
+    const run = ++diffRun.current
+    diffWorker.current?.terminate()
     setDiffBusy(true)
     setDiffError('')
     try {
@@ -190,13 +204,14 @@ export function WorkflowWorkbench({ project, operation, onGenerated }: Props) {
         const worker = new Worker(new URL('../workers/diff.worker.ts', import.meta.url), {
           type: 'module',
         })
+        diffWorker.current = worker
         const result = await new Promise<DiffItem[]>((resolve, reject) => {
           worker.onmessage = (event) => resolve(event.data)
           worker.onerror = () => reject(new Error('Diff Worker 执行失败。'))
           worker.postMessage({ baseline: project.parsed, candidate: parsed })
         })
         worker.terminate()
-        setDiffItems(result)
+        if (run === diffRun.current) setDiffItems(result)
       } else
         setDiffItems(
           diffOpenApi(
@@ -207,9 +222,10 @@ export function WorkflowWorkbench({ project, operation, onGenerated }: Props) {
           ),
         )
     } catch (error) {
-      setDiffError(error instanceof Error ? error.message : String(error))
+      if (run === diffRun.current)
+        setDiffError(error instanceof Error ? error.message : String(error))
     } finally {
-      setDiffBusy(false)
+      if (run === diffRun.current) setDiffBusy(false)
     }
   }
   const validate = () => {

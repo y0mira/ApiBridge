@@ -37,6 +37,7 @@ describe('OpenAPI diff', () => {
   it('produces stable Markdown and JSON reports', () => {
     expect(diffToMarkdown(items)).toBe(diffToMarkdown([...items]))
     expect(diffToJson(items)).toBe(diffToJson([...items]))
+    expect(JSON.parse(diffToJson(items))).toEqual({ schemaVersion: '1.0.0', items })
     expect(diffToMarkdown(items)).toContain('OpenAPI contract diff')
   })
   it('classifies required request body additions as breaking', () => {

@@ -1,0 +1,37 @@
+name: Release candidate artifacts
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - run: npm ci
+      - run: npm run build
+      - run: npm run pack:smoke
+      - name: Build Windows single-file launcher
+        shell: pwsh
+        run: npm run build:launcher
+      - run: |
+          mkdir release
+          npm pack --workspace @api-bridge/core --pack-destination release
+          npm pack --workspace @api-bridge/cli --pack-destination release
+          cp web.config.json release/web.config.json
+          cd dist && zip -r ../release/api-bridge-web.zip .
+          cd ../release && sha256sum * > SHA256SUMS
+      - run: gh release create "$GITHUB_REF_NAME" release/* --generate-notes --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}

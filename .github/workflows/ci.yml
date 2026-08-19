@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run pack:smoke
+      - name: Compile Windows launcher
+        shell: pwsh
+        run: npm run build:launcher
+
+  cli-platforms:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build:core
+      - run: npm run build:cli
+      - run: npm run test:cli
+      - run: npm run pack:smoke

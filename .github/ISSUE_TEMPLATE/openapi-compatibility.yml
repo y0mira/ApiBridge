@@ -1,0 +1,17 @@
+name: OpenAPI compatibility
+description: Report a valid OpenAPI construct that is unsupported or mapped incorrectly
+title: '[OpenAPI] '
+labels: [compatibility]
+body:
+  - type: dropdown
+    id: version
+    attributes: { label: OpenAPI version, options: ['3.0.x', '3.1.x'] }
+    validations: { required: true }
+  - type: textarea
+    id: construct
+    attributes: { label: Minimal sanitized schema, render: yaml }
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes: { label: Expected and actual behavior }
+    validations: { required: true }

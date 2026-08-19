@@ -1,5 +1,7 @@
 import type { DiffItem, OpenApiDocument, Operation, Schema } from './types'
 
+export const DIFF_REPORT_SCHEMA_VERSION = '1.0.0' as const
+
 const sortItems = (items: DiffItem[]) =>
   items.sort(
     (a, b) =>
@@ -291,5 +293,5 @@ export function diffToMarkdown(items: DiffItem[]) {
   return `# OpenAPI contract diff\n\n${items.length ? items.map((item) => `- **${item.severity.toUpperCase()}** \`${item.kind}\` at \`${item.pointer}\` — ${item.reason}`).join('\n') : 'No changes.'}\n`
 }
 export function diffToJson(items: DiffItem[]) {
-  return `${JSON.stringify(items, null, 2)}\n`
+  return `${JSON.stringify({ schemaVersion: DIFF_REPORT_SCHEMA_VERSION, items }, null, 2)}\n`
 }

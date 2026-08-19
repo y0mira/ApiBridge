@@ -3,5 +3,10 @@ dist/
 coverage/
 playwright-report/
 test-results/
+release/
+launcher/web/*
+!launcher/web/README.txt
 *.tsbuildinfo
+*.tgz
+.api-bridge-manifest.json
 .DS_Store

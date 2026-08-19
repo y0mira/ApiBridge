@@ -1,0 +1,28 @@
+{
+  "name": "@api-bridge/core",
+  "version": "0.1.0",
+  "description": "Environment-neutral OpenAPI parser, generators and contract checks for API Bridge",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "yaml": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,24 @@
+name: API contract
+on: [pull_request]
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx api-bridge check ./openapi.yaml
+      - run: npx api-bridge generate ./openapi.yaml --output ./src/api --check
+      - name: Contract diff
+        id: diff
+        continue-on-error: true
+        run: npx api-bridge diff ./baseline.yaml ./openapi.yaml --format markdown --output contract-diff.md
+      - run: npx api-bridge diff ./baseline.yaml ./openapi.yaml --format json --output contract-diff.json || true
+      - uses: actions/upload-artifact@v4
+        with: { name: contract-diff, path: 'contract-diff.*' }
+      - if: steps.diff.outcome == 'failure'
+        run: exit 1
